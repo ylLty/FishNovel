@@ -4,47 +4,366 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FishNovel"
-        mc:Ignorable="d"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="MainWindow" Height="600" Width="900">
-    <Grid Name="MainGrid">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="40"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="25"/>
-            </Grid.RowDefinitions>
-            <DockPanel Grid.Row="0" Background="#FFEDEDED">
-                <TextBlock Name="AD" Text="广告位招租" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="10,0,0,0"/>
-            </DockPanel>
-            
-            <Grid Grid.Row="1" Name="ContentGrid" Background="AliceBlue">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="400"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Grid Name="WorkGrid" >
-                    
-                    
-                </Grid>
-                <Grid Name="PreviewGrid" Grid.Column="1">
-                    <wv2:WebView2 Name="Preview"/>
-                </Grid>
+        Title="FishNovel"
+        Height="720"
+        Width="1200"
+        MinHeight="600"
+        MinWidth="950">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="28"/>
+        </Grid.RowDefinitions>
+
+        <!-- 顶部 -->
+        <DockPanel Grid.Row="0"
+                   Background="#FFEDEDED">
+
+            <TextBlock Text="FishNovel · 小说阅读专练"
+                       FontSize="16"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"
+                       Margin="14,0,0,0"/>
+
+            <TextBlock Text="阅读训练材料生成器"
+                       Foreground="Gray"
+                       VerticalAlignment="Center"
+                       Margin="15,0,0,0"/>
+        </DockPanel>
+
+        <!-- 主体 -->
+        <Grid Grid.Row="1"
+              Background="#FFF5F7FA">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="410"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ================= 左侧配置区 ================= -->
+            <Grid Grid.Column="0"
+                  Background="White">
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+
+                    <StackPanel Margin="16">
+
+                        <!-- 小说 -->
+                        <GroupBox Header="1. 小说文本"
+                                  Padding="8"
+                                  Margin="0,0,0,12">
+
+                            <StackPanel>
+
+                                <Grid Margin="0,0,0,7">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox x:Name="TxtFilePath"
+                                             IsReadOnly="True"
+                                             VerticalContentAlignment="Center"/>
+
+                                    <Button Grid.Column="1"
+                                            Content="导入 TXT"
+                                            Padding="12,5"
+                                            Margin="6,0,0,0"
+                                            Name="BtnSelectFile"
+                                            Click="BtnSelectFile_Click"/>
+                                </Grid>
+
+                                <TextBlock Text="也可以直接粘贴或修改正文："
+                                           FontSize="11"
+                                           Foreground="Gray"
+                                           Margin="0,2,0,5"/>
+
+                                <TextBox x:Name="TxtNovelContent"
+                                         Height="150"
+                                         TextWrapping="Wrap"
+                                         AcceptsReturn="True"
+                                         VerticalScrollBarVisibility="Auto"
+                                         TextChanged="TxtNovelContent_TextChanged"/>
+
+                            </StackPanel>
+                        </GroupBox>
+
+
+                        <!-- 文本清洗 -->
+                        <GroupBox Header="2. 文本清洗"
+                                  Padding="8"
+                                  Margin="0,0,0,12">
+
+                            <StackPanel>
+
+                                <CheckBox x:Name="ChkSmartLineBreak"
+                                          Content="智能删除正文中的多余换行"
+                                          IsChecked="True"
+                                          Margin="0,0,0,6"
+                                          Checked="RealtimeUpdate_Changed"
+                                          Unchecked="RealtimeUpdate_Changed"/>
+
+                                <TextBlock Text="说明：连续正文中的单行换行会被合并，空行仍作为段落分隔。"
+                                           FontSize="11"
+                                           Foreground="Gray"
+                                           TextWrapping="Wrap"/>
+
+                            </StackPanel>
+                        </GroupBox>
+
+
+                        <!-- 章节 -->
+                        <GroupBox Header="3. 章节分段规则"
+                                  Padding="8"
+                                  Margin="0,0,0,12">
+
+                            <StackPanel Margin="0,10,0,0">
+                                <TextBlock
+        Text="章节划分"
+        FontSize="14"
+        FontWeight="SemiBold"
+        Margin="0,0,0,6"/>
+
+                                <StackPanel>
+                                    <RadioButton
+            x:Name="RdoAutoChapter"
+            Content="自动识别章节"
+            IsChecked="True"
+            GroupName="ChapterSplitMode"
+            Checked="ChapterSplitMode_Changed"
+            Margin="0,2"/>
+
+                                    <RadioButton
+            x:Name="RdoParagraphChapter"
+            Content="按段落数分章"
+            GroupName="ChapterSplitMode"
+            Checked="ChapterSplitMode_Changed"
+            Margin="0,2"/>
+
+                                    <RadioButton
+            x:Name="RdoNoChapter"
+            Content="不分章"
+            GroupName="ChapterSplitMode"
+            Checked="ChapterSplitMode_Changed"
+            Margin="0,2"/>
+                                </StackPanel>
+
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock
+            Grid.Column="0"
+            Text="每章段落数："
+            VerticalAlignment="Center"/>
+
+                                    <TextBox
+            x:Name="TxtParagraphsPerChapter"
+            Grid.Column="1"
+            Text="20"
+            Width="80"
+            HorizontalAlignment="Left"
+            Margin="8,0,0,0"
+            Padding="6,3"
+            IsEnabled="False"
+            TextChanged="TxtParagraphsPerChapter_TextChanged"/>
+                                </Grid>
+
+                                <TextBlock
+        Text="章节识别规则（每行一个规则）"
+        Margin="0,10,0,4"/>
+
+                                <TextBox
+        x:Name="TxtChapterRules"
+        Height="80"
+        AcceptsReturn="True"
+        TextWrapping="Wrap"
+        VerticalScrollBarVisibility="Auto"
+        Text="第一章&#10;第二章&#10;第三章&#10;第&#10;Chapter "
+        ToolTip="例如：第一章、第、Chapter 等。每行一个规则。"/>
+                            </StackPanel>
+                        </GroupBox>
+
+
+                        <!-- 专练信息 -->
+                        <GroupBox Header="4. 阅读专练信息"
+                                  Padding="8"
+                                  Margin="0,0,0,12">
+
+                            <StackPanel>
+
+                                <DockPanel Margin="0,0,0,8">
+                                    <TextBlock Text="标题："
+                                               Width="60"
+                                               VerticalAlignment="Center"/>
+
+                                    <TextBox x:Name="TxtExamTitle"
+                                             Text="小说阅读专练"
+                                             TextChanged="RealtimeUpdate_Changed"/>
+                                </DockPanel>
+
+                                <DockPanel>
+                                    <TextBlock Text="副标题："
+                                               Width="60"
+                                               VerticalAlignment="Center"/>
+
+                                    <TextBox x:Name="TxtSubtitle"
+                                             Text="现代文阅读与文本理解训练"
+                                             TextChanged="RealtimeUpdate_Changed"/>
+                                </DockPanel>
+
+                            </StackPanel>
+                        </GroupBox>
+
+
+                        <!-- 题目 -->
+                        <GroupBox Header="5. 阅读题目"
+                                  Padding="8"
+                                  Margin="0,0,0,12">
+
+                            <StackPanel>
+
+                                <TextBlock Text="题目可以自由添加、修改和删除。"
+                                           FontSize="11"
+                                           Foreground="Gray"
+                                           Margin="0,0,0,7"/>
+
+                                <ItemsControl x:Name="QuestionList">
+
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+
+                                            <Border BorderBrush="#FFE0E0E0"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    Padding="7"
+                                                    Margin="0,0,0,7">
+
+                                                <Grid>
+
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <TextBox Grid.Row="0"
+                                                             Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
+                                                             TextWrapping="Wrap"
+                                                             AcceptsReturn="True"
+                                                             MinHeight="45"
+                                                             TextChanged="Question_TextChanged"/>
+
+                                                    <DockPanel Grid.Row="1"
+                                                               Margin="0,6,0,0">
+
+                                                        <TextBlock Text="分值"
+                                                                   VerticalAlignment="Center"/>
+
+                                                        <TextBox Text="{Binding Score, UpdateSourceTrigger=PropertyChanged}"
+                                                                 Width="45"
+                                                                 Margin="5,0,10,0"
+                                                                 HorizontalContentAlignment="Center"/>
+
+                                                        <Button Content="删除"
+                                                                Padding="8,3"
+                                                                Click="BtnDeleteQuestion_Click"/>
+
+                                                    </DockPanel>
+
+                                                </Grid>
+
+                                            </Border>
+
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+
+                                </ItemsControl>
+
+                                <Button Content="+ 添加题目"
+                                        Height="34"
+                                        Margin="0,3,0,0"
+                                        Click="BtnAddQuestion_Click"/>
+
+                            </StackPanel>
+                        </GroupBox>
+
+
+                        <!-- 导出 -->
+                        <Button x:Name="BtnExportDocx"
+                                Content="保存为 Word 阅读专练 (.docx)"
+                                Height="45"
+                                Background="#FF2E7D32"
+                                Foreground="White"
+                                FontWeight="Bold"
+                                FontSize="14"
+                                Margin="0,4,0,8"
+                                Click="BtnExportDocx_Click"/>
+
+                        <!-- 进度 -->
+                        <ProgressBar x:Name="ProgressBar"
+                                     Height="7"
+                                     Minimum="0"
+                                     Maximum="100"
+                                     Visibility="Collapsed"/>
+
+                        <TextBlock x:Name="ProgressText"
+                                   Text=""
+                                   FontSize="11"
+                                   Foreground="Gray"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,5,0,0"/>
+
+                    </StackPanel>
+
+                </ScrollViewer>
+
             </Grid>
 
-            <DockPanel Grid.Row="2" Background="#FFEDEDED">
-                <TextBlock Name="Ver" Text="v1.0.0 —— “规则就是用来打破的”" Foreground="Gray" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                <TextBlock Name="Copy" Text="Copyright © 2026 yl_lty. All rights reserved." Foreground="Gray" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,10,0"/>
-            </DockPanel>
+
+            <!-- ================= 右侧预览 ================= -->
+            <Grid Grid.Column="1"
+                  Background="#FFE9EDF2">
+
+                <wv2:WebView2 x:Name="Preview"/>
+
+            </Grid>
+
         </Grid>
-        <StackPanel Grid.Row="0" Name="Toast" HorizontalAlignment="Center">
-            <!--<Border Background="#FFE6B0B0" CornerRadius="5" Padding="8" Margin="8">
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <materialDesign:PackIcon Kind="InfoOutline" Width="16" Height="26" Foreground="AliceBlue"/>
-        <TextBlock Name="ToastText" Text="123" Foreground="AliceBlue" VerticalAlignment="Center"/>
-    </StackPanel>
-</Border>-->
-        </StackPanel>
+
+
+        <!-- 底部 -->
+        <DockPanel Grid.Row="2"
+                   Background="#FFEDEDED">
+
+            <TextBlock x:Name="Ver"
+                       Text="v2.0.0 · 阅读专练模式"
+                       Foreground="Gray"
+                       VerticalAlignment="Center"
+                       Margin="10,0,0,0"/>
+
+            <TextBlock x:Name="Copy"
+                       Text="Copyright © 2026 yl_lty. All rights reserved."
+                       Foreground="Gray"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right"
+                       Margin="10,0,10,0"/>
+
+        </DockPanel>
+
+
+        <!-- Toast -->
+        <StackPanel Grid.Row="0"
+                    Name="Toast"
+                    HorizontalAlignment="Center"
+                    Panel.ZIndex="100"/>
+
     </Grid>
+
 </Window>

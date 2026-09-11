@@ -2,3 +2,4 @@
 Scriban
 material design theme
 HtmlToOpenXml
+Microsoft Webview2
