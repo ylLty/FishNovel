@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .title { text-align: center; font-family: "黑体"; font-size: 22px; }
+        .novel-text { font-family: "楷体"; text-indent: 2em; line-height: 1.5; }
+        .question { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="title">{{ exam_title }}</div>
+    <div class="novel-text">
+        <!-- scriban 会自动对小说文本进行 HTML 安全编码，防止报错 -->
+        {{ novel_content | html.escape }} 
+    </div>
+    
+    <!-- 循环生成题目 -->
+    {{ for q in questions }}
+    <div class="question">{{ q.index }}. {{ q.title }}</div>
+    <div class="answer-line">答：______________________________________</div>
+    {{ end }}
+</body>
+</html>
