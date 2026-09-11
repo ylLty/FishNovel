@@ -305,6 +305,16 @@
                                 FontSize="14"
                                 Margin="0,4,0,8"
                                 Click="BtnExportDocx_Click"/>
+                        
+                        <Button x:Name="BtnExportPdf"
+                                Content="保存为 PDF 阅读专练 (.pdf)"
+                                Height="45"
+                                Background="#FF2E7D32"
+                                Foreground="White"
+                                FontWeight="Bold"
+                                FontSize="14"
+                                Margin="0,4,0,8"
+                                Click="BtnExportPdf_Click"/>
 
                         <!-- 进度 -->
                         <ProgressBar x:Name="ProgressBar"

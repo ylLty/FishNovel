@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.Packaging;
 using HtmlToOpenXml;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Win32;
 using Scriban;
 using System;
@@ -1060,11 +1061,10 @@ body {
 
 .chapter {
     margin-top: 34px;
-    page-break-before: always;
 }
 
 .chapter:first-child {
-    page-break-before: auto;
+    margin-top: 0;
 }
 
 .chapter-title {
@@ -1129,13 +1129,7 @@ body {
         max-width: none;
     }
 
-    .chapter {
-        page-break-before: always;
-    }
-
-    .chapter:first-child {
-        page-break-before: auto;
-    }
+    
 
 }
 
@@ -1438,7 +1432,71 @@ body {
             }
         }
 
-        private void ExportHtmlToDocx(
+        private async void BtnExportPdf_Click(
+    object sender,
+    RoutedEventArgs e)
+        {
+            if (!_isWebViewInitialized ||
+                Preview.CoreWebView2 == null)
+            {
+                ToastMsg("预览尚未初始化完成。");
+                return;
+            }
+
+            SaveFileDialog dialog = new SaveFileDialog
+            {
+                Filter = "PDF 文档 (*.pdf)|*.pdf",
+                DefaultExt = ".pdf",
+                AddExtension = true,
+                FileName = "小说阅读专练.pdf"
+            };
+
+            if (dialog.ShowDialog() != true)
+                return;
+
+            try
+            {
+                SetBusy(true, "正在生成 PDF……", 0);
+
+                CoreWebView2PrintSettings settings =
+                    Preview.CoreWebView2.Environment
+                        .CreatePrintSettings();
+
+                // 使用 CSS / HTML 自己定义的页面布局
+                settings.ShouldPrintBackgrounds = true;
+
+                // 不显示浏览器默认页眉页脚
+                settings.ShouldPrintHeaderAndFooter = false;
+
+                SetProgress(30, "正在渲染打印页面……");
+
+                bool success =
+                    await Preview.CoreWebView2.PrintToPdfAsync(
+                        dialog.FileName,
+                        settings);
+
+                if (!success)
+                {
+                    ToastMsg("PDF 生成失败。");
+                    return;
+                }
+
+                SetProgress(100, "PDF 导出完成");
+
+                ToastMsg("PDF 阅读专练导出成功！");
+            }
+            catch (Exception ex)
+            {
+                ToastMsg($"PDF 导出失败：{ex.Message}");
+            }
+            finally
+            {
+                SetBusy(false);
+            }
+        }
+
+        private void 
+            ExportHtmlToDocx(
             string html,
             string fileName,
             CancellationToken cancellationToken)
