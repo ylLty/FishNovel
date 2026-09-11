@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36915.13 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FishNovel", "FishNovel.csproj", "{E0041D82-5F92-4F49-8009-B44C7B430EDA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E0041D82-5F92-4F49-8009-B44C7B430EDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0041D82-5F92-4F49-8009-B44C7B430EDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0041D82-5F92-4F49-8009-B44C7B430EDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0041D82-5F92-4F49-8009-B44C7B430EDA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FC60AE22-A72E-4DE8-BF66-799D260AE49C}
+	EndGlobalSection
+EndGlobal
