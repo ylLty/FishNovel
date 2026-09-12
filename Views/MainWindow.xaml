@@ -205,7 +205,7 @@
                                                VerticalAlignment="Center"/>
 
                                     <TextBox x:Name="TxtExamTitle"
-                                             Text="小说阅读专练"
+                                             Text="语文阅读专练"
                                              TextChanged="RealtimeUpdate_Changed"/>
                                 </DockPanel>
 

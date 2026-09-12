@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -1008,9 +1009,9 @@ namespace FishNovel
         // ============================================================
 
         private string BuildHtml(
-            string title,
-            string subtitle,
-            List<ChapterModel> chapters)
+string title,
+string subtitle,
+List<ChapterModel> chapters)
         {
             const string templateText = @"
 <!DOCTYPE html>
@@ -1024,20 +1025,60 @@ namespace FishNovel
     box-sizing: border-box;
 }
 
+html {
+    background: #e5e5e5;
+}
+
 body {
     margin: 0;
-    padding: 42px;
-    background: #ffffff;
+    padding: 24px 0 50px 0;
+    background: #e5e5e5;
     color: #222222;
     font-family: ""SimSun"", ""宋体"", serif;
     font-size: 15px;
     line-height: 1.9;
 }
 
-.paper {
-    max-width: 900px;
+/* ============================================================
+   A4 页面
+   ============================================================ */
+
+#document {
+    width: 210mm;
     margin: 0 auto;
 }
+
+.pdf-page {
+    position: relative;
+
+    width: 210mm;
+    height: 297mm;
+
+    margin: 0 auto 24px auto;
+
+    background: #ffffff;
+
+    padding: 20mm 18mm 20mm 18mm;
+
+    overflow: hidden;
+
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
+.page-content {
+    width: 100%;
+
+    /*
+     * 页面底部给页码预留空间。
+     */
+    height: calc(100% - 8mm);
+
+    overflow: hidden;
+}
+
+/* ============================================================
+   封面
+   ============================================================ */
 
 .cover {
     text-align: center;
@@ -1059,6 +1100,10 @@ body {
     font-size: 14px;
 }
 
+/* ============================================================
+   章节
+   ============================================================ */
+
 .chapter {
     margin-top: 34px;
 }
@@ -1068,68 +1113,170 @@ body {
 }
 
 .chapter-title {
-    font-family: ""SimHei"", ""黑体"", sans-serif;
-    ...
-    border-left: 4px solid #333;
-    padding-left: 12px;
+    font-family: ""KaiTi"", ""楷体"", serif;
+    font-size: 21px;
+    font-weight: bold;
+
+    text-align: center;
+
+    margin:
+        0 0
+        20px 0;
+
+    padding:
+        0 0
+        8px 0;
 }
 
 .paragraph {
-    font-family: ""楷体"";
+    font-family: ""KaiTi"", ""楷体"", serif;
+
     text-indent: 2em;
-    margin: 0 0 12px 0;
+
+    margin:
+        0 0
+        12px 0;
+
     text-align: justify;
 }
 
-.questions {
-    margin-top: 42px;
-    page-break-before: always;
+/* ============================================================
+   阅读思考
+   ============================================================ */
+
+.chapter-questions {
+    margin-top: 32px;
 }
 
-.questions-title {
-    font-family: ""宋体"", sans-serif;
-    font-size: 20px;
+.chapter-questions-title {
+    font-family: ""SimSun"", ""宋体"", serif;
+
+    font-size: 18px;
     font-weight: bold;
-    margin-bottom: 22px;
+
+    margin-bottom: 18px;
+
     border-bottom: 1px solid #444;
-    padding-bottom: 8px;
+
+    padding-bottom: 7px;
 }
 
 .question {
-    margin-bottom: 28px;
+    margin-bottom: 20px;
+
+    break-inside: avoid;
 }
 
 .question-text {
+    font-family: ""SimSun"", ""宋体"", serif;
+
     font-weight: bold;
-    margin-bottom: 12px;
+
+    margin-bottom: 10px;
 }
 
 .answer-line {
     height: 30px;
+
     border-bottom: 1px solid #777;
+
     margin-left: 1em;
+
+    margin-bottom: 2px;
 }
 
-.footer {
-    margin-top: 50px;
-    padding-top: 10px;
-    border-top: 1px solid #ccc;
+/* ============================================================
+   页码
+   ============================================================ */
+
+.page-number {
+    position: absolute;
+
+    left: 18mm;
+    right: 18mm;
+    bottom: 7mm;
+
+    height: 7mm;
+
     text-align: center;
-    font-size: 11px;
-    color: #888;
+
+    font-family: ""SimSun"", ""宋体"", serif;
+
+    font-size: 10pt;
+
+    line-height: 7mm;
+
+    color: #666;
+}
+
+/* ============================================================
+   原始内容
+   ============================================================ */
+
+#source {
+    display: none;
+}
+
+/* ============================================================
+   屏幕预览
+   ============================================================ */
+
+@media screen {
+
+    .pdf-page {
+        display: block;
+    }
+
+}
+
+/* ============================================================
+   PDF 打印
+   ============================================================ */
+
+@page {
+    size: A4 portrait;
+    margin: 0;
 }
 
 @media print {
 
+    html,
     body {
-        padding: 20mm;
+        background: #ffffff;
     }
 
-    .paper {
-        max-width: none;
+    body {
+        padding: 0;
+        margin: 0;
     }
 
-    
+    #document {
+        width: 210mm;
+        margin: 0;
+    }
+
+    .pdf-page {
+        width: 210mm;
+        height: 297mm;
+
+        margin: 0;
+
+        box-shadow: none;
+
+        page-break-after: always;
+        break-after: page;
+
+        overflow: hidden;
+    }
+
+    .pdf-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+    }
+
+    #source {
+        display: none;
+    }
 
 }
 
@@ -1138,7 +1285,9 @@ body {
 
 <body>
 
-<div class=""paper"">
+<div id=""document""></div>
+
+<div id=""source"">
 
     <div class=""cover"">
         <div class=""title"">{{ title }}</div>
@@ -1147,92 +1296,908 @@ body {
 
     {{ for chapter in chapters }}
 
-<section class=""chapter"">
+    <section class=""chapter"">
 
-    <div class=""chapter-title"">
-        {{ chapter.title }}
-    </div>
-
-    {{ for paragraph in chapter.paragraphs }}
-
-    <p class=""paragraph"">
-        {{ paragraph }}
-    </p>
-
-    {{ end }}
-
-    {{ if chapter.questions.size > 0 }}
-
-    <div class=""chapter-questions"">
-
-        <div class=""chapter-questions-title"">
-            阅读思考
+        <div class=""chapter-title"">
+            {{ chapter.title }}
         </div>
 
-        {{ for question in chapter.questions }}
+        {{ for paragraph in chapter.paragraphs }}
 
-        <div class=""question"">
+        <p class=""paragraph"">
+            {{ paragraph }}
+        </p>
 
-            <div class=""question-text"">
-                {{ question.index }}. {{ question.text }}
-                {{ if question.score }}
-                （{{ question.score }}分）
-                {{ end }}
+        {{ end }}
+
+        {{ if chapter.questions.size > 0 }}
+
+        <div class=""chapter-questions"">
+
+            <div class=""chapter-questions-title"">
+                阅读思考
             </div>
 
-            <div class=""answer-line""></div>
-            <div class=""answer-line""></div>
-            <div class=""answer-line""></div>
+            {{ for question in chapter.questions }}
+
+            <div class=""question"">
+
+                <div class=""question-text"">
+                    {{ question.index }}. {{ question.text }}
+                    {{ if question.score }}
+                    （{{ question.score }}分）
+                    {{ end }}
+                </div>
+
+                <div class=""answer-line""></div>
+                <div class=""answer-line""></div>
+                <div class=""answer-line""></div>
+
+            </div>
+
+            {{ end }}
 
         </div>
 
         {{ end }}
 
-    </div>
+    </section>
 
     {{ end }}
 
-</section>
-
-{{ end }}
-
-    <div class=""footer"">
-        FishNovel · 小说阅读专练
-    </div>
-
 </div>
+
+<script>
+
+(function () {
+
+    /*
+     * ============================================================
+     * 创建页面
+     * ============================================================
+     */
+    function createPage() {
+
+        const documentContainer =
+            document.getElementById(""document"");
+
+        const page =
+            document.createElement(""div"");
+
+        page.className =
+            ""pdf-page"";
+
+        const content =
+            document.createElement(""div"");
+
+        content.className =
+            ""page-content"";
+
+        const pageNumber =
+            document.createElement(""div"");
+
+        pageNumber.className =
+            ""page-number"";
+
+        page.appendChild(content);
+        page.appendChild(pageNumber);
+
+        documentContainer.appendChild(page);
+
+        return page;
+    }
+
+
+    /*
+     * ============================================================
+     * 判断页面是否溢出
+     * ============================================================
+     */
+    function isOverflowing(content) {
+
+        return (
+            content.scrollHeight >
+            content.clientHeight + 1
+        );
+    }
+
+
+    /*
+     * ============================================================
+     * 将完整元素加入当前页面
+     *
+     * 注意：
+     *
+     * 这里只负责“完整元素”。
+     *
+     * 如果放不下：
+     *     当前页什么都不动
+     *     创建下一页
+     *     再放进去
+     *
+     * 不存在章节结束换页。
+     * 不存在题目结束换页。
+     * ============================================================
+     */
+    function addBlock(
+        element,
+        currentPage)
+    {
+        let content =
+            currentPage.querySelector(
+                "".page-content""
+            );
+
+        /*
+         * 先尝试当前页。
+         */
+        content.appendChild(element);
+
+        if (
+            !isOverflowing(content)
+        ) {
+
+            return currentPage;
+        }
+
+        /*
+         * 当前页放不下。
+         *
+         * 撤销。
+         */
+        content.removeChild(element);
+
+
+        /*
+         * 创建下一页。
+         */
+        currentPage =
+            createPage();
+
+        content =
+            currentPage.querySelector(
+                "".page-content""
+            );
+
+        content.appendChild(element);
+
+        return currentPage;
+    }
+
+
+    /*
+     * ============================================================
+     * 添加可以跨页的正文段落
+     *
+     * 一个段落放不下时：
+     *
+     *     当前页填到最后
+     *     剩余文字进入下一页
+     *
+     * 不允许一个长段落制造大片空白。
+     * ============================================================
+     */
+    function addParagraph(
+        paragraph,
+        currentPage)
+    {
+        let remaining =
+            paragraph.textContent || """";
+
+        if (
+            remaining.trim().length === 0
+        ) {
+
+            return currentPage;
+        }
+
+
+        while (
+            remaining.length > 0
+        ) {
+
+            let content =
+                currentPage.querySelector(
+                    "".page-content""
+                );
+
+
+            /*
+             * ----------------------------------------------------
+             * 先尝试完整段落。
+             * ----------------------------------------------------
+             */
+            const whole =
+                paragraph.cloneNode(false);
+
+            whole.textContent =
+                remaining;
+
+            content.appendChild(whole);
+
+            if (
+                !isOverflowing(content)
+            ) {
+
+                /*
+                 * 完整段落放下了。
+                 */
+                break;
+            }
+
+            /*
+             * 撤销完整段落。
+             */
+            content.removeChild(whole);
+
+
+            /*
+             * ----------------------------------------------------
+             * 二分寻找当前页面最多能放多少文字。
+             * ----------------------------------------------------
+             */
+            let low = 1;
+            let high =
+                remaining.length;
+
+            let best = 0;
+
+            while (
+                low <= high
+            ) {
+
+                const middle =
+                    Math.floor(
+                        (low + high) / 2
+                    );
+
+                const test =
+                    paragraph.cloneNode(false);
+
+                test.textContent =
+                    remaining.substring(
+                        0,
+                        middle
+                    );
+
+                content.appendChild(test);
+
+                const overflow =
+                    isOverflowing(content);
+
+                content.removeChild(test);
+
+                if (
+                    !overflow
+                ) {
+
+                    best =
+                        middle;
+
+                    low =
+                        middle + 1;
+                }
+                else {
+
+                    high =
+                        middle - 1;
+                }
+            }
+
+
+            /*
+             * ----------------------------------------------------
+             * 当前页面连一个字符都放不下。
+             *
+             * 创建下一页。
+             * ----------------------------------------------------
+             */
+            if (
+                best <= 0
+            ) {
+
+                currentPage =
+                    createPage();
+
+                continue;
+            }
+
+
+            /*
+             * ----------------------------------------------------
+             * 正式加入能够容纳的部分。
+             * ----------------------------------------------------
+             */
+            const part =
+                paragraph.cloneNode(false);
+
+            part.textContent =
+                remaining.substring(
+                    0,
+                    best
+                );
+
+            content.appendChild(part);
+
+
+            /*
+             * 剩余文字。
+             */
+            remaining =
+                remaining.substring(
+                    best
+                );
+
+
+            /*
+             * ----------------------------------------------------
+             * 还有文字就继续下一页。
+             * ----------------------------------------------------
+             */
+            if (
+                remaining.length > 0
+            ) {
+
+                currentPage =
+                    createPage();
+            }
+        }
+
+        return currentPage;
+    }
+
+
+    /*
+     * ============================================================
+     * 添加章节标题
+     *
+     * 章节标题本身是完整元素。
+     *
+     * 如果当前位置放不下：
+     *     只把标题移动到下一页。
+     *
+     * 注意：
+     * 这并不意味着章节结束后换页。
+     * ============================================================
+     */
+    function addChapterTitle(
+        title,
+        currentPage)
+    {
+        return addBlock(
+            title.cloneNode(true),
+            currentPage
+        );
+    }
+
+
+    /*
+     * ============================================================
+     * 添加阅读思考标题
+     *
+     * 阅读思考标题也是普通完整元素。
+     *
+     * 如果当前页放得下，就绝不换页。
+     * ============================================================
+     */
+    function addQuestionsTitle(
+        title,
+        currentPage)
+    {
+        return addBlock(
+            title.cloneNode(true),
+            currentPage
+        );
+    }
+
+
+    /*
+     * ============================================================
+     * 添加一道题
+     *
+     * 一道题作为一个整体。
+     *
+     * 题目 + 三条答题线必须保持在一起。
+     *
+     * 只有整道题真的放不下时才换页。
+     * ============================================================
+     */
+    function addQuestion(
+        question,
+        currentPage)
+    {
+        return addBlock(
+            question.cloneNode(true),
+            currentPage
+        );
+    }
+
+
+    /*
+     * ============================================================
+     * 处理章节
+     *
+     * 非常重要：
+     *
+     * 这里没有任何：
+     *
+     *     “章节结束后换页”
+     *
+     *     “文章结束后换页”
+     *
+     *     “题目结束后换页”
+     *
+     *     “下一章节必须换页”
+     *
+     * 所有内容都是从当前位置继续往下排。
+     * ============================================================
+     */
+    function addChapter(
+        chapter,
+        currentPage)
+    {
+        const children =
+            Array.from(
+                chapter.children
+            );
+
+
+        for (
+            let i = 0;
+            i < children.length;
+            i++
+        ) {
+
+            const child =
+                children[i];
+
+
+            /*
+             * ----------------------------------------------------
+             * 章节标题
+             * ----------------------------------------------------
+             */
+            if (
+                child.classList.contains(
+                    ""chapter-title""
+                )
+            ) {
+
+                currentPage =
+                    addChapterTitle(
+                        child,
+                        currentPage
+                    );
+
+                continue;
+            }
+
+
+            /*
+             * ----------------------------------------------------
+             * 正文段落
+             *
+             * 可以跨页。
+             * ----------------------------------------------------
+             */
+            if (
+                child.classList.contains(
+                    ""paragraph""
+                )
+            ) {
+
+                currentPage =
+                    addParagraph(
+                        child.cloneNode(true),
+                        currentPage
+                    );
+
+                continue;
+            }
+
+
+            /*
+             * ----------------------------------------------------
+             * 阅读思考
+             * ----------------------------------------------------
+             */
+            if (
+                child.classList.contains(
+                    ""chapter-questions""
+                )
+            ) {
+
+                const questionChildren =
+                    Array.from(
+                        child.children
+                    );
+
+
+                for (
+                    let q = 0;
+                    q < questionChildren.length;
+                    q++
+                ) {
+
+                    const questionElement =
+                        questionChildren[q];
+
+
+                    /*
+                     * 阅读思考标题
+                     */
+                    if (
+                        questionElement.classList.contains(
+                            ""chapter-questions-title""
+                        )
+                    ) {
+
+                        currentPage =
+                            addQuestionsTitle(
+                                questionElement,
+                                currentPage
+                            );
+
+                        continue;
+                    }
+
+
+                    /*
+                     * 单独一道题
+                     */
+                    if (
+                        questionElement.classList.contains(
+                            ""question""
+                        )
+                    ) {
+
+                        currentPage =
+                            addQuestion(
+                                questionElement,
+                                currentPage
+                            );
+
+                        continue;
+                    }
+
+
+                    /*
+                     * 其他内容正常处理。
+                     */
+                    currentPage =
+                        addBlock(
+                            questionElement.cloneNode(true),
+                            currentPage
+                        );
+                }
+
+                /*
+                 * =================================================
+                 * 关键：
+                 *
+                 * 这里直接 continue。
+                 *
+                 * 绝对不能 createPage()。
+                 *
+                 * 所以下一个章节会紧接着继续使用当前页面。
+                 * =================================================
+                 */
+                continue;
+            }
+
+
+            /*
+             * ----------------------------------------------------
+             * 其他未知元素
+             * ----------------------------------------------------
+             */
+            currentPage =
+                addBlock(
+                    child.cloneNode(true),
+                    currentPage
+                );
+        }
+
+
+        /*
+         * ========================================================
+         * 关键：
+         *
+         * 章节结束以后直接返回当前页面。
+         *
+         * 不创建新页面。
+         * ========================================================
+         */
+        return currentPage;
+    }
+
+
+    /*
+     * ============================================================
+     * 主分页
+     * ============================================================
+     */
+    function paginate() {
+
+        const documentContainer =
+            document.getElementById(
+                ""document""
+            );
+
+        const source =
+            document.getElementById(
+                ""source""
+            );
+
+
+        /*
+         * 清空旧页面。
+         */
+        documentContainer.innerHTML =
+            """";
+
+
+        /*
+         * 创建第一页。
+         */
+        let currentPage =
+            createPage();
+
+
+        const elements =
+            Array.from(
+                source.children
+            );
+
+
+        /*
+         * ========================================================
+         * 严格按照 source 原始顺序处理。
+         * ========================================================
+         */
+        for (
+            let i = 0;
+            i < elements.length;
+            i++
+        ) {
+
+            const element =
+                elements[i];
+
+
+            /*
+             * 章节。
+             */
+            if (
+                element.classList.contains(
+                    ""chapter""
+                )
+            ) {
+
+                currentPage =
+                    addChapter(
+                        element,
+                        currentPage
+                    );
+
+                /*
+                 * =================================================
+                 * 注意：
+                 *
+                 * 这里绝对不创建新页面。
+                 *
+                 * 下一个 chapter 会直接接着当前页面。
+                 * =================================================
+                 */
+                continue;
+            }
+
+
+            /*
+             * 其他内容，例如封面。
+             */
+            if (
+                element.classList.contains(
+                    ""cover""
+                )
+            ) {
+
+                currentPage =
+                    addBlock(
+                        element.cloneNode(true),
+                        currentPage
+                    );
+
+                continue;
+            }
+
+
+            /*
+             * 未知元素也按照普通元素处理。
+             */
+            currentPage =
+                addBlock(
+                    element.cloneNode(true),
+                    currentPage
+                );
+        }
+
+
+        /*
+         * ========================================================
+         * 删除空页面
+         *
+         * 理论上第一页不会为空。
+         * ========================================================
+         */
+        const pages =
+            Array.from(
+                documentContainer.querySelectorAll(
+                    "".pdf-page""
+                )
+            );
+
+
+        for (
+            let i = pages.length - 1;
+            i >= 0;
+            i--
+        ) {
+
+            const content =
+                pages[i].querySelector(
+                    "".page-content""
+                );
+
+            if (
+                content &&
+                content.children.length === 0
+            ) {
+
+                pages[i].remove();
+            }
+        }
+
+
+        /*
+         * ========================================================
+         * 最终页码
+         * ========================================================
+         */
+        const finalPages =
+            documentContainer.querySelectorAll(
+                "".pdf-page""
+            );
+
+
+        finalPages.forEach(
+            function (
+                page,
+                index)
+            {
+
+                const number =
+                    page.querySelector(
+                        "".page-number""
+                    );
+
+                if (number) {
+
+                    number.textContent =
+                        ""第 "" +
+                        (index + 1) +
+                        "" 页"";
+                }
+            }
+        );
+
+
+        /*
+         * ========================================================
+         * 告知 WPF 分页完成。
+         * ========================================================
+         */
+        document.body.setAttribute(
+            ""data-pagination-complete"",
+            ""true""
+        );
+
+        document.body.setAttribute(
+            ""data-page-count"",
+            finalPages.length
+        );
+    }
+
+
+    /*
+     * ============================================================
+     * 等待字体和布局稳定。
+     * ============================================================
+     */
+    function start() {
+
+        if (
+            document.fonts &&
+            document.fonts.ready
+        ) {
+
+            document.fonts.ready.then(
+                function () {
+
+                    requestAnimationFrame(
+                        function () {
+
+                            requestAnimationFrame(
+                                function () {
+
+                                    paginate();
+                                }
+                            );
+                        }
+                    );
+                }
+            );
+
+        }
+        else {
+
+            requestAnimationFrame(
+                function () {
+
+                    paginate();
+                }
+            );
+        }
+    }
+
+
+    /*
+     * ============================================================
+     * 启动
+     * ============================================================
+     */
+    if (
+        document.readyState ===
+        ""loading""
+    ) {
+
+        document.addEventListener(
+            ""DOMContentLoaded"",
+            start
+        );
+
+    }
+    else {
+
+        start();
+    }
+
+})();
+
+</script>
 
 </body>
 </html>";
 
-            //var questionModels = questions
-            //    .Select((q, index) => new
-            //    {
-            //        index = index + 1,
-            //        text = HtmlEncode(q.Text),
-            //        score = HtmlEncode(q.Score)
-            //    })
-            //    .ToList();
-
             var chapterModels = chapters
-    .Select(c => new
-    {
-        title = HtmlEncode(c.Title),
+                .Select(c => new
+                {
+                    title = HtmlEncode(c.Title),
 
-        paragraphs = c.Paragraphs
-            .Select(HtmlEncode)
-            .ToList(),
+                    paragraphs = c.Paragraphs
+                        .Select(HtmlEncode)
+                        .ToList(),
 
-        questions = (c.Questions ?? new List<QuestionItem>())
-            .Select((q, index) => new
-            {
-                index = index + 1,
-                text = HtmlEncode(q.Text),
-                score = HtmlEncode(q.Score)
-            })
-            .ToList()
-    })
-    .ToList();
+                    questions = (c.Questions ?? new List<QuestionItem>())
+                        .Select((q, index) => new
+                        {
+                            index = index + 1,
+                            text = HtmlEncode(q.Text),
+                            score = HtmlEncode(q.Score)
+                        })
+                        .ToList()
+                })
+                .ToList();
 
             var model = new
             {
@@ -1250,14 +2215,6 @@ body {
                         Environment.NewLine,
                         template.Messages));
             }
-
-            //var model = new
-            //{
-            //    title = HtmlEncode(title),
-            //    subtitle = HtmlEncode(subtitle),
-            //    chapters = chapterModels,
-            //    //questions = questionModels
-            //};
 
             return template.Render(model);
         }
@@ -1442,13 +2399,13 @@ body {
                 ToastMsg("预览尚未初始化完成。");
                 return;
             }
-
+            string fileName = TxtExamTitle.Text + ".pdf";
             SaveFileDialog dialog = new SaveFileDialog
             {
                 Filter = "PDF 文档 (*.pdf)|*.pdf",
                 DefaultExt = ".pdf",
                 AddExtension = true,
-                FileName = "小说阅读专练.pdf"
+                FileName = fileName
             };
 
             if (dialog.ShowDialog() != true)
@@ -1484,6 +2441,14 @@ body {
                 SetProgress(100, "PDF 导出完成");
 
                 ToastMsg("PDF 阅读专练导出成功！");
+                try
+                {
+                    Process.Start("explorer.exe", $"/select,\"{dialog.FileName}\"");
+                }
+                catch (Exception ex)
+                { 
+                    ToastMsg($"打开所在文件夹失败：{ex.Message}");
+                }
             }
             catch (Exception ex)
             {
